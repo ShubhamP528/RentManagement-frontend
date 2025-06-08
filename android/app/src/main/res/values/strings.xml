@@ -1,3 +1,11 @@
 <resources>
-    <string name="app_name">RentManagement</string>
+	<string name="app_name">
+		RentManagement
+	</string>
+	<string moduleConfig="true" name="CodePushServerUrl">
+		https://api.revopush.org
+	</string>
+	<string moduleConfig="true" name="CodePushDeploymentKey">
+		wBwR-gIv7CXlY7rRkukmO6cUpnFd4k1K1rdyGg
+	</string>
 </resources>

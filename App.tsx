@@ -1,131 +1,60 @@
-/**
- * Sample React Native App
- * https://github.com/facebook/react-native
- *
- * @format
- */
+// import React, {useEffect} from 'react';
 
-import React from 'react';
-import type {PropsWithChildren} from 'react';
-import {
-  ScrollView,
-  StatusBar,
-  StyleSheet,
-  Text,
-  useColorScheme,
-  View,
-} from 'react-native';
+// import './global.css';
+// import HomeStackNavigator from './src/stacks/Home';
+// import {Provider} from 'react-redux';
+// import {store} from './src/redux/store';
+// import {checkAppVersion} from './src/constants';
 
-import {
-  Colors,
-  DebugInstructions,
-  Header,
-  LearnMoreLinks,
-  ReloadInstructions,
-} from 'react-native/Libraries/NewAppScreen';
+// const App: React.FC = () => {
+//   useEffect(() => {
+//     checkAppVersion();
+//   }, []);
 
-type SectionProps = PropsWithChildren<{
-  title: string;
-}>;
+//   return (
+//     <Provider store={store}>
+//       <HomeStackNavigator />
+//     </Provider>
+//   );
+// };
 
-function Section({children, title}: SectionProps): React.JSX.Element {
-  const isDarkMode = useColorScheme() === 'dark';
-  return (
-    <View style={styles.sectionContainer}>
-      <Text
-        style={[
-          styles.sectionTitle,
-          {
-            color: isDarkMode ? Colors.white : Colors.black,
-          },
-        ]}>
-        {title}
-      </Text>
-      <Text
-        style={[
-          styles.sectionDescription,
-          {
-            color: isDarkMode ? Colors.light : Colors.dark,
-          },
-        ]}>
-        {children}
-      </Text>
-    </View>
-  );
-}
+// export default App;
 
-function App(): React.JSX.Element {
-  const isDarkMode = useColorScheme() === 'dark';
+import React, {useEffect} from 'react';
+import codePush from '@revopush/react-native-code-push';
+import './global.css';
+import HomeStackNavigator from './src/stacks/Home';
+import {Provider} from 'react-redux';
+import {store} from './src/redux/store';
+import {checkAppVersion} from './src/constants';
 
-  const backgroundStyle = {
-    backgroundColor: isDarkMode ? Colors.darker : Colors.lighter,
-  };
+// Optional: define sync options
+const codePushOptions = {
+  checkFrequency: codePush.CheckFrequency.ON_APP_START,
+  installMode: codePush.InstallMode.IMMEDIATE,
+  updateDialog: {
+    title: 'Update available',
+    optionalUpdateMessage:
+      'A new version is ready. Would you like to install it now?',
+    optionalInstallButtonLabel: 'Yes',
+    optionalIgnoreButtonLabel: 'Later',
+  },
+};
 
-  /*
-   * To keep the template simple and small we're adding padding to prevent view
-   * from rendering under the System UI.
-   * For bigger apps the reccomendation is to use `react-native-safe-area-context`:
-   * https://github.com/AppAndFlow/react-native-safe-area-context
-   *
-   * You can read more about it here:
-   * https://github.com/react-native-community/discussions-and-proposals/discussions/827
-   */
-  const safePadding = '5%';
+const App: React.FC = () => {
+  useEffect(() => {
+    // kicks off the OTA update check
+    checkAppVersion();
+    codePush.sync(codePushOptions);
+  }, []);
 
   return (
-    <View style={backgroundStyle}>
-      <StatusBar
-        barStyle={isDarkMode ? 'light-content' : 'dark-content'}
-        backgroundColor={backgroundStyle.backgroundColor}
-      />
-      <ScrollView
-        style={backgroundStyle}>
-        <View style={{paddingRight: safePadding}}>
-          <Header/>
-        </View>
-        <View
-          style={{
-            backgroundColor: isDarkMode ? Colors.black : Colors.white,
-            paddingHorizontal: safePadding,
-            paddingBottom: safePadding,
-          }}>
-          <Section title="Step One">
-            Edit <Text style={styles.highlight}>App.tsx</Text> to change this
-            screen and then come back to see your edits.
-          </Section>
-          <Section title="See Your Changes">
-            <ReloadInstructions />
-          </Section>
-          <Section title="Debug">
-            <DebugInstructions />
-          </Section>
-          <Section title="Learn More">
-            Read the docs to discover what to do next:
-          </Section>
-          <LearnMoreLinks />
-        </View>
-      </ScrollView>
-    </View>
+    <Provider store={store}>
+      <HomeStackNavigator />
+    </Provider>
   );
-}
+};
 
-const styles = StyleSheet.create({
-  sectionContainer: {
-    marginTop: 32,
-    paddingHorizontal: 24,
-  },
-  sectionTitle: {
-    fontSize: 24,
-    fontWeight: '600',
-  },
-  sectionDescription: {
-    marginTop: 8,
-    fontSize: 18,
-    fontWeight: '400',
-  },
-  highlight: {
-    fontWeight: '700',
-  },
-});
-
-export default App;
+// Wrap your root App with the CodePush HOC before exporting.
+// This HOC wires in the native bridge integration under the hood.
+export default codePush(codePushOptions)(App);
