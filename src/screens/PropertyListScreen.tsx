@@ -271,6 +271,7 @@ const PropertyListScreen = ({navigation}: PropertiesProps) => {
             <TextInput
               className="w-full p-4 border border-gray-300 rounded-lg mb-4"
               placeholder="Property Name"
+              placeholderTextColor="#9CA3AF"
               value={propertyName}
               onChangeText={setPropertyName}
             />
@@ -280,6 +281,7 @@ const PropertyListScreen = ({navigation}: PropertiesProps) => {
                 key={key}
                 className="w-full p-4 border border-gray-300 rounded-lg mb-4"
                 placeholder={key.charAt(0).toUpperCase() + key.slice(1)}
+                placeholderTextColor="#9CA3AF"
                 value={address[key as keyof Address]}
                 onChangeText={text =>
                   setAddress(prev => ({...prev, [key]: text}))

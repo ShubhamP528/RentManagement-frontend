@@ -306,6 +306,7 @@ const PropertyDetailScreen = ({route, navigation}: PropertyDetailProps) => {
             <Text className="text-lg font-bold mb-4">Add New Room</Text>
             <TextInput
               placeholder="Enter room name"
+              placeholderTextColor="#9CA3AF"
               value={newRoomName}
               onChangeText={setNewRoomName}
               className="border rounded-lg p-4 mb-4"

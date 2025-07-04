@@ -100,9 +100,9 @@ const TransactionList = ({route}: TransactionListProps) => {
     if (
       !DOP ||
       !MOP ||
-      !RoomRent ||
-      !currentReading ||
-      !previousReading
+      !RoomRent
+      // !currentReading ||
+      // !previousReading
       // !BuildReading ||
       // !Bill
     ) {
@@ -129,6 +129,8 @@ const TransactionList = ({route}: TransactionListProps) => {
       Bill: (Number(currentReading) - Number(previousReading)) * 6,
       status,
     };
+
+    console.log(payload);
 
     try {
       setAddLoading(true);
@@ -333,6 +335,7 @@ const TransactionList = ({route}: TransactionListProps) => {
             <Text className="text-lg text-gray-700 mb-1">Month of Payment</Text>
             <TextInput
               placeholder="March - April"
+              placeholderTextColor="#9CA3AF"
               value={MOP}
               onChangeText={setMOP}
               className="bg-gray-200 rounded-md p-3 mb-3"
@@ -342,6 +345,7 @@ const TransactionList = ({route}: TransactionListProps) => {
             <Text className="text-lg text-gray-700 mb-1">Room Rent (₹)</Text>
             <TextInput
               placeholder="500"
+              placeholderTextColor="#9CA3AF"
               value={RoomRent}
               onChangeText={setRoomRent}
               keyboardType="numeric"
@@ -354,6 +358,7 @@ const TransactionList = ({route}: TransactionListProps) => {
             </Text>
             <TextInput
               placeholder="200"
+              placeholderTextColor="#9CA3AF"
               value={currentReading}
               onChangeText={setCurrentReading}
               keyboardType="numeric"

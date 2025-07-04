@@ -247,6 +247,7 @@ const AddNewTenant: React.FC<TenantFormModalProps> = ({
                 errors.tenantData.Rent ? 'border-red-500' : ''
               }`}
               placeholder="Rent"
+              placeholderTextColor="#9CA3AF"
               keyboardType="numeric"
               onChangeText={text => setTenantData({...tenantData, Rent: text})}
               value={tenantData.Rent}
@@ -255,6 +256,7 @@ const AddNewTenant: React.FC<TenantFormModalProps> = ({
             <TextInput
               className="border p-2 rounded mb-2"
               placeholder="Initial Reading"
+              placeholderTextColor="#9CA3AF"
               keyboardType="numeric"
               onChangeText={text =>
                 setTenantData({...tenantData, initialReading: text})
@@ -293,6 +295,7 @@ const AddNewTenant: React.FC<TenantFormModalProps> = ({
                   }`}
                   // className="border p-2 rounded mb-2"
                   placeholder="Name"
+                  placeholderTextColor="#9CA3AF"
                   onChangeText={text => updatePerson(index, 'name', text)}
                   value={person.name}
                   style={{fontSize: 16, height: 50}}
@@ -328,6 +331,7 @@ const AddNewTenant: React.FC<TenantFormModalProps> = ({
                 <TextInput
                   className="border p-2 rounded mb-2"
                   placeholder="Email"
+                  placeholderTextColor="#9CA3AF"
                   onChangeText={text => updatePerson(index, 'email', text)}
                   value={person.email}
                   style={{fontSize: 16, height: 50}}
@@ -336,6 +340,7 @@ const AddNewTenant: React.FC<TenantFormModalProps> = ({
                 <TextInput
                   className="border p-2 rounded mb-2"
                   placeholder="Mobile Number"
+                  placeholderTextColor="#9CA3AF"
                   onChangeText={text =>
                     updatePerson(index, 'phoneNumber', text)
                   }
@@ -387,6 +392,7 @@ const AddNewTenant: React.FC<TenantFormModalProps> = ({
                   style={{fontSize: 16, height: 50}}
                   className="border p-2 rounded mb-2"
                   placeholder="Relation Type"
+                  placeholderTextColor="#9CA3AF"
                   onChangeText={text =>
                     updateRelation(index, 'relationType', text)
                   }
