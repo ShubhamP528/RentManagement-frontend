@@ -1,7 +1,7 @@
 export const NODE_API_ENDPOINT =
   process.env.NODE_ENV === 'production'
     ? 'https://rent-management-backend-three.vercel.app'
-    : 'http://192.168.144.115:8800';
+    : 'http://192.168.1.4:8800';
 
 import DeviceInfo from 'react-native-device-info';
 import {Alert, Linking, Platform} from 'react-native';

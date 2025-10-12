@@ -1,0 +1,82 @@
+/* EMERGENCY TEXT VISIBILITY FIX */
+/* This file forces all text to be visible regardless of Tailwind classes */
+
+/* Force all text elements to have proper colors */
+* {
+  color: #222c3a !important;
+}
+
+/* Dark mode overrides */
+.dark * {
+  color: #f4f6fb !important;
+}
+
+/* Specific text color overrides */
+.text-gray-800,
+.text-gray-900,
+.text-black {
+  color: #222c3a !important;
+}
+
+.text-gray-600,
+.text-gray-700 {
+  color: #5b5b6a !important;
+}
+
+.text-gray-500,
+.text-gray-400,
+.text-gray-300 {
+  color: #8c92a4 !important;
+}
+
+/* Dark mode text overrides */
+.dark .text-gray-800,
+.dark .text-gray-900,
+.dark .text-black {
+  color: #f4f6fb !important;
+}
+
+.dark .text-gray-600,
+.dark .text-gray-700 {
+  color: #d2d6e3 !important;
+}
+
+.dark .text-gray-500,
+.dark .text-gray-400,
+.dark .text-gray-300 {
+  color: #a2adc6 !important;
+}
+
+/* Force white text to be visible */
+.text-white {
+  color: #ffffff !important;
+}
+
+.dark .text-white {
+  color: #f4f6fb !important;
+}
+
+/* Override any inherited colors */
+p,
+span,
+div,
+h1,
+h2,
+h3,
+h4,
+h5,
+h6,
+text {
+  color: inherit !important;
+}
+
+/* Input text colors */
+input,
+textarea {
+  color: #222c3a !important;
+}
+
+.dark input,
+.dark textarea {
+  color: #f4f6fb !important;
+}

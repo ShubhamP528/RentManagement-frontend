@@ -1,3 +1,244 @@
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
+
+/* Custom root styles for our rent management theme */
+body,
+html {
+  background-color: #f9fafb; /* Light theme background */
+  margin: 0;
+  padding: 0;
+}
+
+/* Dark mode support */
+@media (prefers-color-scheme: dark) {
+  body,
+  html {
+    background-color: #151f2b; /* Dark theme background */
+  }
+}
+
+/* Ensure React Native root view fills screen */
+#root,
+.react-native-root {
+  flex: 1;
+  background-color: inherit;
+}
+/* Override any conflicting Tailwind base styles */
+* {
+  box-sizing: border-box;
+}
+
+/* Ensure full height and width */
+body,
+html {
+  height: 100% !important;
+  width: 100% !important;
+}
+
+/* Ensure React Native root containers fill screen */
+#root,
+.react-native-root,
+[data-reactroot] {
+  flex: 1 !important;
+  height: 100% !important;
+  width: 100% !important;
+  background-color: inherit !important;
+}
+
+/* Override specific Tailwind background classes with our theme colors */
+.bg-gray-50 {
+  background-color: #f9fafb !important;
+}
+
+.bg-gray-900 {
+  background-color: #151f2b !important;
+}
+
+.bg-white {
+  background-color: #ffffff !important;
+}
+
+.dark .bg-gray-800 {
+  background-color: #202c3b !important;
+}
+
+.dark .bg-gray-900 {
+  background-color: #151f2b !important;
+}
+
+/* Ensure our surface colors are applied */
+.bg-gray-100 {
+  background-color: #f3f4f8 !important;
+}
+
+.dark .bg-gray-700 {
+  background-color: #263140 !important;
+}
+/* Fix text visibility in dark mode */
+.dark .text-gray-800 {
+  color: #f4f6fb !important; /* Light text for dark mode */
+}
+
+.dark .text-white {
+  color: #f4f6fb !important;
+}
+
+.dark .text-gray-600 {
+  color: #d2d6e3 !important; /* Secondary text for dark mode */
+}
+
+.dark .text-gray-300 {
+  color: #d2d6e3 !important;
+}
+
+.dark .text-gray-500 {
+  color: #a2adc6 !important; /* Tertiary text for dark mode */
+}
+
+.dark .text-gray-400 {
+  color: #a2adc6 !important;
+}
+
+/* Ensure light mode text colors */
+.text-gray-800 {
+  color: #222c3a !important; /* Primary text for light mode */
+}
+
+.text-gray-600 {
+  color: #5b5b6a !important; /* Secondary text for light mode */
+}
+
+.text-gray-500 {
+  color: #8c92a4 !important; /* Tertiary text for light mode */
+}
+
+.text-gray-400 {
+  color: #8c92a4 !important;
+}
+
+.text-gray-300 {
+  color: #8c92a4 !important;
+}
+
+/* Input text colors */
+.dark input,
+.dark textarea {
+  color: #f4f6fb !important;
+}
+
+input,
+textarea {
+  color: #222c3a !important;
+}
+/* Ensure dark mode is applied to root elements */
+html.dark,
+body.dark,
+#root.dark {
+  background-color: #151f2b !important;
+  color: #f4f6fb !important;
+}
+
+/* Force dark mode styles when dark theme is active */
+[data-theme='dark'] .text-gray-800,
+[data-theme='dark'] .text-white {
+  color: #f4f6fb !important;
+}
+
+[data-theme='dark'] .text-gray-600,
+[data-theme='dark'] .text-gray-300 {
+  color: #d2d6e3 !important;
+}
+
+[data-theme='dark'] .text-gray-500,
+[data-theme='dark'] .text-gray-400 {
+  color: #a2adc6 !important;
+}
+/* CRITICAL: Force text visibility in all modes */
+* {
+  color: inherit !important;
+}
+
+/* Light mode text colors - force visibility */
+.text-gray-800,
+.text-gray-900,
+h1,
+h2,
+h3,
+h4,
+h5,
+h6,
+p,
+span,
+div {
+  color: #222c3a !important;
+}
+
+.text-gray-600,
+.text-gray-700 {
+  color: #5b5b6a !important;
+}
+
+.text-gray-500,
+.text-gray-400,
+.text-gray-300 {
+  color: #8c92a4 !important;
+}
+
+/* Dark mode text colors - force visibility */
+.dark .text-gray-800,
+.dark .text-gray-900,
+.dark h1,
+.dark h2,
+.dark h3,
+.dark h4,
+.dark h5,
+.dark h6,
+.dark p,
+.dark span,
+.dark div {
+  color: #f4f6fb !important;
+}
+
+.dark .text-gray-600,
+.dark .text-gray-700 {
+  color: #d2d6e3 !important;
+}
+
+.dark .text-gray-500,
+.dark .text-gray-400,
+.dark .text-gray-300 {
+  color: #a2adc6 !important;
+}
+
+/* Ensure white text is visible in dark mode */
+.dark .text-white {
+  color: #f4f6fb !important;
+}
+
+.text-white {
+  color: #ffffff !important;
+}
+
+/* Force all text elements to have proper contrast */
+[class*='text-gray'] {
+  color: #222c3a !important;
+}
+
+.dark [class*='text-gray'] {
+  color: #f4f6fb !important;
+}
+
+/* Specific overrides for common patterns */
+.text-lg,
+.text-xl,
+.text-2xl,
+.text-3xl {
+  color: inherit !important;
+}
+
+.font-bold,
+.font-semibold,
+.font-medium {
+  color: inherit !important;
+}

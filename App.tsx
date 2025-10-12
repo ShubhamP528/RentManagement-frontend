@@ -27,6 +27,7 @@ import HomeStackNavigator from './src/stacks/Home';
 import {Provider} from 'react-redux';
 import {store} from './src/redux/store';
 import {checkAppVersion} from './src/constants';
+import {ThemeProvider} from './src/contexts/ThemeContext';
 
 // Optional: define sync options
 const codePushOptions = {
@@ -50,7 +51,9 @@ const App: React.FC = () => {
 
   return (
     <Provider store={store}>
-      <HomeStackNavigator />
+      <ThemeProvider>
+        <HomeStackNavigator />
+      </ThemeProvider>
     </Provider>
   );
 };

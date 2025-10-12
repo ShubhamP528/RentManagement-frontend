@@ -75,6 +75,16 @@ def enableProguardInReleaseBuilds = false
  */
 def jscFlavor = 'io.github.react-native-community:jsc-android:2026004.+'
 
+// The 'hermesEnabled' variable might be defined in your root project's build.gradle or gradle.properties
+// If it's not, you might need to define it or remove the 'if (hermesEnabled.toBoolean())' check
+// For simplicity, assuming it's defined elsewhere, or you are using Hermes by default.
+// If you get errors about hermesEnabled, you might need to set:
+// project.ext.set("hermesEnabled", true) // or false, in your android/build.gradle (root project)
+
+// project.ext.react = [
+//   enableHermes: true
+// ]
+
 android {
     ndkVersion rootProject.ext.ndkVersion
     buildToolsVersion rootProject.ext.buildToolsVersion
@@ -116,6 +126,15 @@ android {
             proguardFiles getDefaultProguardFile("proguard-android.txt"), "proguard-rules.pro"
         }
     }
+
+    // splits {
+    //     abi {
+    //         enable true
+    //         reset()
+    //         include 'armeabi-v7a', 'arm64-v8a'
+    //         universalApk false
+    //     }
+    // }
 }
 
 dependencies {
