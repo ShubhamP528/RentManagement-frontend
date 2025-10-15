@@ -45,7 +45,7 @@ const CustomHeader: React.FC<CustomHeaderProps> = ({
 
   // Get status bar height
   const statusBarHeight =
-    Platform.OS === 'ios' ? 44 : StatusBar.currentHeight || 24;
+    Platform.OS === 'ios' ? 40 : StatusBar.currentHeight || 20;
 
   return (
     <View
@@ -53,9 +53,9 @@ const CustomHeader: React.FC<CustomHeaderProps> = ({
         backgroundColor: themeColors.surface,
         borderBottomColor: themeColors.border,
         borderBottomWidth: 1,
-        paddingTop: statusBarHeight + 8,
+        paddingTop: statusBarHeight + 2,
         paddingHorizontal: 16,
-        paddingBottom: 12,
+        paddingBottom: 8,
       }}>
       <StatusBar
         backgroundColor={themeColors.surface}

@@ -564,6 +564,28 @@ const TenantCarousel = ({navigation, route}: PropertyDetailProps) => {
                     </ThemedText>
                   </View>
                 </MenuOption>
+                <MenuOption
+                  onSelect={() =>
+                    navigation.push('TenantDocuments', {
+                      tenantId: item._id,
+                    })
+                  }>
+                  <View className="flex-row items-center py-2">
+                    <Icon
+                      name="file-document"
+                      size={18}
+                      color={RentAppColors.accent[500]}
+                    />
+                    <ThemedText
+                      weight="medium"
+                      style={{
+                        marginLeft: 8,
+                        color: RentAppColors.accent[500],
+                      }}>
+                      View Documents
+                    </ThemedText>
+                  </View>
+                </MenuOption>
               </MenuOptions>
             </Menu>
           </View>

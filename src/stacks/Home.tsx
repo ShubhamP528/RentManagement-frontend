@@ -13,6 +13,7 @@ import {RentAppColors, getRentThemeColors} from '../constants/colors';
 
 import TenantCarousel from '../screens/TenantCarousel';
 import TransactionList from '../screens/TransactionList';
+import TenantDocuments from '../screens/TenantDocuments';
 import {MenuProvider} from 'react-native-popup-menu';
 import PropertyDetailScreen from '../screens/PropertyDetailScreen ';
 
@@ -26,6 +27,9 @@ export type RootStackParamList = {
     tenantId: string;
     roomId: string;
     previousReading: number;
+  };
+  TenantDocuments: {
+    tenantId: string;
   };
 };
 
@@ -98,6 +102,11 @@ function HomeStackNavigator() {
           <Stack.Screen
             name="TransactionDetails"
             component={TransactionList}
+            options={{headerShown: false}}
+          />
+          <Stack.Screen
+            name="TenantDocuments"
+            component={TenantDocuments}
             options={{headerShown: false}}
           />
         </Stack.Navigator>
