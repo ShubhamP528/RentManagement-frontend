@@ -6,6 +6,8 @@ import {
   Modal,
   TextInput,
   ActivityIndicator,
+  Platform,
+  PermissionsAndroid,
 } from 'react-native';
 import {
   launchImageLibrary,
@@ -41,6 +43,45 @@ const DocumentUpload: React.FC<DocumentUploadProps> = ({
   const {isDark} = useTheme();
   const themeColors = getRentThemeColors(isDark);
 
+  // Simplified permission handler for storage only (camera permission removed from manifest)
+  const requestStoragePermissions = async (): Promise<boolean> => {
+    if (Platform.OS !== 'android') return true;
+
+    try {
+      const androidVersion = Platform.Version as number;
+      let permission: any;
+
+      // Handle storage permissions based on Android version
+      if (androidVersion >= 33) {
+        // Android 13+ (API 33+) - New granular media permissions
+        permission = 'android.permission.READ_MEDIA_IMAGES';
+      } else {
+        // Android 12 and below - Traditional storage permission
+        permission = PermissionsAndroid.PERMISSIONS.READ_EXTERNAL_STORAGE;
+      }
+
+      // Check if permission is already granted
+      const hasPermission = await PermissionsAndroid.check(permission);
+      if (hasPermission) {
+        return true;
+      }
+
+      // Request permission
+      const granted = await PermissionsAndroid.request(permission, {
+        title: 'Storage Permission',
+        message: 'This app needs access to your photos to upload documents.',
+        buttonNeutral: 'Ask Me Later',
+        buttonNegative: 'Cancel',
+        buttonPositive: 'OK',
+      });
+
+      return granted === PermissionsAndroid.RESULTS.GRANTED;
+    } catch (error) {
+      console.error('Permission request error:', error);
+      return false;
+    }
+  };
+
   const openDocumentPicker = () => {
     Alert.alert('Document Upload', 'Choose how to add your document:', [
       {
@@ -58,7 +99,17 @@ const DocumentUpload: React.FC<DocumentUploadProps> = ({
     ]);
   };
 
-  const pickImageFromGallery = () => {
+  const pickImageFromGallery = async () => {
+    // For gallery, we need storage permissions
+    const hasPermission = await requestStoragePermissions();
+    if (!hasPermission) {
+      Alert.alert(
+        'Permission Required',
+        'Storage permission is needed to access your photos. Please grant permission in app settings.',
+      );
+      return;
+    }
+
     const options = {
       mediaType: 'photo' as MediaType,
       quality: 0.8 as const,
@@ -70,6 +121,12 @@ const DocumentUpload: React.FC<DocumentUploadProps> = ({
     launchImageLibrary(options, (response: ImagePickerResponse) => {
       if (response.didCancel || response.errorMessage) {
         console.log('Image picker cancelled or error:', response.errorMessage);
+        if (response.errorMessage?.includes('permission')) {
+          Alert.alert(
+            'Permission Error',
+            'Gallery access permission is required. Please check your app permissions in device settings.',
+          );
+        }
         return;
       }
 
@@ -92,11 +149,18 @@ const DocumentUpload: React.FC<DocumentUploadProps> = ({
       maxWidth: 1024,
       maxHeight: 1024,
       includeBase64: false,
+      saveToPhotos: false, // Don't save to gallery to avoid permission issues
     };
 
     launchCamera(options, (response: ImagePickerResponse) => {
       if (response.didCancel || response.errorMessage) {
         console.log('Camera cancelled or error:', response.errorMessage);
+        if (response.errorMessage?.includes('permission')) {
+          Alert.alert(
+            'Camera Error',
+            'Camera access failed. Please ensure your device camera is working properly.',
+          );
+        }
         return;
       }
 

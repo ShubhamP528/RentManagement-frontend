@@ -284,6 +284,7 @@ const TransactionList = ({route, navigation}: TransactionListProps) => {
     index: number;
   }) => {
     const formatDate = (dateString: string) => {
+      console.log(dateString);
       const date = new Date(dateString);
       return date.toLocaleDateString('en-GB', {
         day: '2-digit',

@@ -116,17 +116,19 @@ const AddNewTenant: React.FC<TenantFormModalProps> = ({
 
   // Initialize data for edit mode
   React.useEffect(() => {
-    if (editMode && visible) {
+    if (!visible) return; // Don't do anything if modal is not visible
+
+    if (editMode) {
       setCurrentStep(2); // Start with family members in edit mode
-      if (initialPersonsData.length > 0) {
+      if (initialPersonsData && initialPersonsData.length > 0) {
         setPersonsData(initialPersonsData);
       }
       if (initialTenantData) {
         setTenantData(initialTenantData);
       }
-    } else if (!editMode && visible) {
+    } else {
+      // Only reset when modal first opens in add mode
       setCurrentStep(1); // Start with rental details in add mode
-      // Reset for add mode
       setPersonsData([]);
       setTenantData({
         startDate: '',
@@ -135,7 +137,7 @@ const AddNewTenant: React.FC<TenantFormModalProps> = ({
         initialReading: '',
       });
     }
-  }, [editMode, visible, initialPersonsData, initialTenantData]);
+  }, [editMode, visible]); // Removed initialPersonsData and initialTenantData from dependencies
 
   const addPerson = () => {
     const newPerson: Person = {

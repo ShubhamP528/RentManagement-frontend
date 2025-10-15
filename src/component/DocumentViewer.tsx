@@ -66,6 +66,7 @@ const DocumentViewer: React.FC<DocumentViewerProps> = ({
   }, []);
 
   const handlePdfError = useCallback((error: any) => {
+    console.log(error.message, 'no');
     setPdfError(error.message || 'Failed to load PDF');
     setPdfLoading(false);
   }, []);
