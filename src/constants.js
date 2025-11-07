@@ -5,6 +5,9 @@ export const NODE_API_ENDPOINT =
 
 import DeviceInfo from 'react-native-device-info';
 import {Alert, Linking, Platform} from 'react-native';
+import {getMessaging} from '@react-native-firebase/messaging';
+import DeviceInfo from 'react-native-device-info';
+import {Platform} from 'react-native';
 
 const API_ENDPOINT =
   'https://rent-management-backend-three.vercel.app/app-version'; // Replace with your actual API
@@ -67,4 +70,23 @@ export const checkAppVersion = async () => {
   } catch (error) {
     console.error('Version check error:', error);
   }
+};
+
+export const getFCMToken = async () => {
+  const token = await getMessaging().getToken();
+  console.log('FCM Token:', token);
+  // Send this token to your backend
+  return token;
+};
+
+export const getDeviceInfoString = async () => {
+  const deviceName = await DeviceInfo.getDeviceName();
+  const uniqueId = await DeviceInfo.getUniqueId();
+
+  const deviceInfoString = `Platform: ${
+    Platform.OS
+  }, Model: ${DeviceInfo.getModel()}, Brand: ${DeviceInfo.getBrand()}, System: ${DeviceInfo.getSystemVersion()}, Device ID: ${DeviceInfo.getDeviceId()}, Name: ${deviceName}, Unique ID: ${uniqueId}, App Version: ${DeviceInfo.getVersion()}`;
+
+  console.log(deviceInfoString);
+  return deviceInfoString;
 };

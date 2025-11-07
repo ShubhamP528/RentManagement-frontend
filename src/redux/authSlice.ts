@@ -1,6 +1,6 @@
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import {createAsyncThunk, createSlice, PayloadAction} from '@reduxjs/toolkit';
-import {NODE_API_ENDPOINT} from '../constants';
+import { createAsyncThunk, createSlice, PayloadAction } from '@reduxjs/toolkit';
+import { getFCMToken, NODE_API_ENDPOINT } from '../constants';
 
 interface User {
   token: string;
@@ -20,10 +20,10 @@ const initialState: AuthState = {
 };
 
 export const retriveAuth = createAsyncThunk<
-  {user: User} | null,
+  { user: User } | null,
   void,
-  {rejectValue: string}
->('/auth/retriveAuth', async (_, {rejectWithValue}) => {
+  { rejectValue: string }
+>('/auth/retriveAuth', async (_, { rejectWithValue }) => {
   try {
     const storedAuth = await AsyncStorage.getItem('rent-owner');
     if (storedAuth) {
@@ -53,7 +53,8 @@ export const retriveAuth = createAsyncThunk<
         token: parsedUser,
         username: parsedProps.username,
       };
-      return {user};
+      const FMCtoken = await getFCMToken()
+      return { user };
     } else {
       return null;
     }
@@ -99,5 +100,5 @@ const autSlice = createSlice({
   },
 });
 
-export const {login, logout} = autSlice.actions;
+export const { login, logout } = autSlice.actions;
 export default autSlice.reducer;

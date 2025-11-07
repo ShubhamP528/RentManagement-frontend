@@ -21,7 +21,11 @@ import {RootStackParamList} from '../stacks/Home';
 import {NODE_API_ENDPOINT} from '../constants';
 import {useDispatch, useSelector} from 'react-redux';
 import {RootState} from '../redux/store';
-import {useFocusEffect} from '@react-navigation/native';
+import {
+  CommonActions,
+  useFocusEffect,
+  useNavigation,
+} from '@react-navigation/native';
 import {logout} from '../redux/authSlice';
 import CustomHeader from '../component/CustomHeader';
 import {RentAppColors, getRentThemeColors} from '../constants/colors';
@@ -67,6 +71,7 @@ const PropertyListScreen = ({navigation}: PropertiesProps) => {
   const [currentStep, setCurrentStep] = useState<number>(1);
   const [focusedField, setFocusedField] = useState<string | null>(null);
   const [formErrors, setFormErrors] = useState<{[key: string]: string}>({});
+  const rootNavigation = useNavigation();
 
   const currentUser = useSelector((state: RootState) => state.auth.user);
   const {isDark} = useTheme();
@@ -266,9 +271,28 @@ const PropertyListScreen = ({navigation}: PropertiesProps) => {
       {
         text: 'Logout',
         style: 'destructive',
-        onPress: () => {
+        onPress: async () => {
+          const logoutAPI = await fetch(
+            `${NODE_API_ENDPOINT}/owner/auth/logout`,
+            {
+              method: 'PATCH',
+              headers: {
+                'Content-Type': 'application/json',
+                Authorization: `Bearer ${currentUser?.token}`,
+              },
+            },
+          );
+          if (!logoutAPI.ok) {
+            Alert.alert('Error', 'Failed to logout. Please try again.');
+            return;
+          }
           dispatch(logout());
-          navigation.replace('Login');
+          rootNavigation.dispatch(
+            CommonActions.reset({
+              index: 0,
+              routes: [{name: 'Login'}], // reset stack to Login screen
+            }),
+          );
         },
       },
     ]);

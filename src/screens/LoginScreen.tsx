@@ -12,7 +12,11 @@ import {
   ScrollView,
 } from 'react-native';
 import {RootStackParamList} from '../stacks/Home';
-import {NODE_API_ENDPOINT} from '../constants';
+import {
+  getDeviceInfoString,
+  getFCMToken,
+  NODE_API_ENDPOINT,
+} from '../constants';
 import {useDispatch} from 'react-redux';
 import {AppDispatch} from '../redux/store';
 import {login} from '../redux/authSlice';
@@ -63,6 +67,8 @@ const LoginScreen = ({navigation}: LoginProps) => {
   const handleLogin = async () => {
     if (username && password) {
       try {
+        const fmcToken = await getFCMToken();
+        const deviceInfo = await getDeviceInfoString();
         setLoading(true);
         const loginUserData = await fetch(
           `${NODE_API_ENDPOINT}/owner/auth/login`,
@@ -71,7 +77,7 @@ const LoginScreen = ({navigation}: LoginProps) => {
             headers: {
               'Content-Type': 'application/json',
             },
-            body: JSON.stringify({username, password}),
+            body: JSON.stringify({username, password, deviceInfo, fmcToken}),
           },
         );
         if (!loginUserData.ok) {

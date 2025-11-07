@@ -6,6 +6,8 @@ import {store} from './src/redux/store';
 import {checkAppVersion} from './src/constants';
 import {ThemeProvider} from './src/contexts/ThemeContext';
 import codePush from '@revopush/react-native-code-push';
+import messaging from '@react-native-firebase/messaging';
+import {PermissionsAndroid, Platform} from 'react-native';
 
 // Optional: define sync options
 const codePushOptions = {
@@ -23,7 +25,25 @@ const App: React.FC = () => {
   useEffect(() => {
     checkAppVersion();
     codePush.sync(codePushOptions);
+    requestUserPermission();
   }, []);
+
+  async function requestUserPermission() {
+    if (Platform.OS === 'ios') {
+      const authStatus = await messaging().requestPermission();
+      const enabled =
+        authStatus === messaging.AuthorizationStatus.AUTHORIZED ||
+        authStatus === messaging.AuthorizationStatus.PROVISIONAL;
+
+      if (enabled) {
+        console.log('Authorization status:', authStatus);
+      }
+    } else if (Platform.OS === 'android') {
+      await PermissionsAndroid.request(
+        PermissionsAndroid.PERMISSIONS.POST_NOTIFICATIONS,
+      );
+    }
+  }
 
   return (
     <Provider store={store}>
