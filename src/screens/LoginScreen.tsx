@@ -12,15 +12,12 @@ import {
   ScrollView,
 } from 'react-native';
 import {RootStackParamList} from '../stacks/Home';
-import {
-  getDeviceInfoString,
-  getFCMToken,
-  NODE_API_ENDPOINT,
-} from '../constants';
+import {getDeviceInfoString, getFCMToken} from '../constants';
 import {useDispatch} from 'react-redux';
 import {AppDispatch} from '../redux/store';
 import {login} from '../redux/authSlice';
 import Icon from 'react-native-vector-icons/MaterialCommunityIcons';
+import api from '../axiosConfig';
 
 import {RentAppColors, getRentThemeColors} from '../constants/colors';
 import {useTheme} from '../contexts/ThemeContext';
@@ -70,32 +67,30 @@ const LoginScreen = ({navigation}: LoginProps) => {
         const fmcToken = await getFCMToken();
         const deviceInfo = await getDeviceInfoString();
         setLoading(true);
-        const loginUserData = await fetch(
-          `${NODE_API_ENDPOINT}/owner/auth/login`,
-          {
-            method: 'POST',
-            headers: {
-              'Content-Type': 'application/json',
-            },
-            body: JSON.stringify({username, password, deviceInfo, fmcToken}),
-          },
-        );
-        if (!loginUserData.ok) {
-          setLoading(false);
-          Alert.alert('Error', 'Invalid username or password');
-          return;
-        }
-        const userData = await loginUserData.json();
+        const response = await api.post('/owner/auth/login', {
+          username,
+          password,
+          deviceInfo,
+          fmcToken,
+        });
+        const userData = response.data;
         setLoading(false);
         // Store user data in AsyncStorage
         console.log(userData);
         dispatch(login({token: userData.token, username: userData.username}));
         Alert.alert('Success', `Welcome, ${userData.username}!`);
         navigation.replace('Properties');
-      } catch (error) {
+      } catch (error: any) {
         setLoading(false);
         console.error('Error fetching user data:', error);
-        Alert.alert('Error', 'Failed to log in. Please try again.');
+        if (error.response) {
+          Alert.alert(
+            'Error',
+            error.response.data?.message || 'Invalid username or password',
+          );
+        } else {
+          Alert.alert('Error', 'Failed to log in. Please try again.');
+        }
       }
     } else {
       Alert.alert('Error', 'Please enter both username and password.');

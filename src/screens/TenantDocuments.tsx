@@ -9,10 +9,10 @@ import {
 } from 'react-native';
 import {NativeStackScreenProps} from '@react-navigation/native-stack';
 import {RootStackParamList} from '../stacks/Home';
-import {NODE_API_ENDPOINT} from '../constants';
 import {useSelector} from 'react-redux';
 import {RootState} from '../redux/store';
 import Icon from 'react-native-vector-icons/MaterialCommunityIcons';
+import api from '../axiosConfig';
 import CustomHeader from '../component/CustomHeader';
 import DocumentUpload from '../component/DocumentUpload';
 import DocumentViewer from '../component/DocumentViewer';
@@ -66,22 +66,8 @@ const TenantDocuments = ({route, navigation}: TenantDocumentsProps) => {
     async (isRefresh = false) => {
       try {
         if (!isRefresh) setLoading(true);
-        const response = await fetch(
-          `${NODE_API_ENDPOINT}/tenant/getAllDocuments/${tenantId}`,
-          {
-            method: 'GET',
-            headers: {
-              'Content-Type': 'application/json',
-              Authorization: `Bearer ${currentUser?.token}`,
-            },
-          },
-        );
-
-        if (!response.ok) {
-          throw new Error('Failed to fetch documents');
-        }
-
-        const data = await response.json();
+        const response = await api.get(`/tenant/getAllDocuments/${tenantId}`);
+        const data = response.data;
         console.log('Documents API response:', data);
 
         // Handle the API response structure based on your API spec
@@ -102,7 +88,7 @@ const TenantDocuments = ({route, navigation}: TenantDocumentsProps) => {
         }
         setLoading(false);
         setRefreshing(false);
-      } catch (error) {
+      } catch (error: any) {
         setLoading(false);
         setRefreshing(false);
 
@@ -118,7 +104,8 @@ const TenantDocuments = ({route, navigation}: TenantDocumentsProps) => {
         // Show user-friendly error message
         Alert.alert(
           'Error',
-          'Failed to fetch documents. Please check your connection and try again.',
+          error.response?.data?.message ||
+            'Failed to fetch documents. Please check your connection and try again.',
           [
             {
               text: 'Retry',
@@ -132,7 +119,7 @@ const TenantDocuments = ({route, navigation}: TenantDocumentsProps) => {
         );
       }
     },
-    [currentUser?.token, tenantId],
+    [tenantId],
   );
 
   const onRefresh = useCallback(() => {
@@ -176,25 +163,16 @@ const TenantDocuments = ({route, navigation}: TenantDocumentsProps) => {
 
   const deleteDocument = async (documentId: string) => {
     try {
-      const response = await fetch(
-        `${NODE_API_ENDPOINT}/tenant/deleteDocument/${tenantId}/${documentId}`,
-        {
-          method: 'DELETE',
-          headers: {
-            'Content-Type': 'application/json',
-            Authorization: `Bearer ${currentUser?.token}`,
-          },
-        },
-      );
-
-      if (!response.ok) {
-        throw new Error('Failed to delete document');
-      }
+      await api.delete(`/tenant/deleteDocument/${tenantId}/${documentId}`);
 
       Alert.alert('Success', 'Document deleted successfully');
       fetchTenantDocuments();
-    } catch (error) {
-      Alert.alert('Error', 'Failed to delete document. Please try again.');
+    } catch (error: any) {
+      Alert.alert(
+        'Error',
+        error.response?.data?.message ||
+          'Failed to delete document. Please try again.',
+      );
       console.error('Error:', error);
     }
   };

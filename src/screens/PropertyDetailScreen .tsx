@@ -17,10 +17,10 @@ import {
 } from 'react-native';
 import Icon from 'react-native-vector-icons/MaterialCommunityIcons';
 import {RootStackParamList} from '../stacks/Home';
-import {NODE_API_ENDPOINT} from '../constants';
 import {useSelector} from 'react-redux';
 import {RootState} from '../redux/store';
 import {useFocusEffect} from '@react-navigation/native';
+import api from '../axiosConfig';
 import CustomHeader from '../component/CustomHeader';
 import {RentAppColors, getRentThemeColors} from '../constants/colors';
 import {useTheme} from '../contexts/ThemeContext';
@@ -99,20 +99,10 @@ const PropertyDetailScreen = ({route, navigation}: PropertyDetailProps) => {
   useEffect(() => {
     const fetchPropertyDetails = async () => {
       try {
-        const response = await fetch(
-          `${NODE_API_ENDPOINT}/properties/get-property/${propertyId}`,
-          {
-            method: 'GET',
-            headers: {
-              'Content-Type': 'application/json',
-              Authorization: `Bearer ${currentUser?.token}`,
-            },
-          },
+        const response = await api.get(
+          `/properties/get-property/${propertyId}`,
         );
-        if (!response.ok) {
-          throw new Error('Failed to fetch property details');
-        }
-        const data = await response.json();
+        const data = response.data;
         console.log(data);
         setProperty(data);
       } catch (error) {
@@ -152,33 +142,24 @@ const PropertyDetailScreen = ({route, navigation}: PropertyDetailProps) => {
     async (isRefresh = false) => {
       if (!isRefresh) setLoading(true);
       try {
-        const response = await fetch(
-          `${NODE_API_ENDPOINT}/properties/get-property/${propertyId}`,
-          {
-            method: 'GET',
-            headers: {
-              'Content-Type': 'application/json',
-              Authorization: `Bearer ${currentUser?.token}`,
-            },
-          },
+        const response = await api.get(
+          `/properties/get-property/${propertyId}`,
         );
-        if (!response.ok) {
-          throw new Error('Failed to fetch property details');
-        }
-        const data = await response.json();
+        const data = response.data;
         setProperty(data);
-      } catch (error) {
+      } catch (error: any) {
         console.error('Error fetching property details', error);
         Alert.alert(
           'Error',
-          'Failed to load property details. Please try again.',
+          error.response?.data?.message ||
+            'Failed to load property details. Please try again.',
         );
       } finally {
         setLoading(false);
         setRefreshing(false);
       }
     },
-    [propertyId, currentUser?.token],
+    [propertyId],
   );
 
   const onRefresh = useCallback(() => {
@@ -206,32 +187,23 @@ const PropertyDetailScreen = ({route, navigation}: PropertyDetailProps) => {
     setErrorMessage('');
 
     try {
-      const response = await fetch(
-        `${NODE_API_ENDPOINT}/room/addroom/${propertyId}`,
-        {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-            Authorization: `Bearer ${currentUser?.token}`,
-          },
-          body: JSON.stringify({roomName: newRoomName}),
-        },
-      );
+      const response = await api.post(`/room/addroom/${propertyId}`, {
+        roomName: newRoomName,
+      });
 
-      if (!response.ok) {
-        throw new Error('Failed to add new room');
-      }
-
-      const newRoom = await response.json();
+      const newRoom = response.data;
       setProperty(
         prev => prev && {...prev, rooms: [...prev.rooms, newRoom.room]},
       );
 
       Alert.alert('Success', 'Room added successfully! 🎉');
       closeModal();
-    } catch (error) {
+    } catch (error: any) {
       console.error('Error adding room:', error);
-      setErrorMessage('Failed to add room. Please try again.');
+      setErrorMessage(
+        error.response?.data?.message ||
+          'Failed to add room. Please try again.',
+      );
     } finally {
       setLoadingAdd(false);
     }

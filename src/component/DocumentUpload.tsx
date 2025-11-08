@@ -20,7 +20,7 @@ import Icon from 'react-native-vector-icons/MaterialCommunityIcons';
 import {RentAppColors, getRentThemeColors} from '../constants/colors';
 import {useTheme} from '../contexts/ThemeContext';
 import {ThemedText} from './ThemedText';
-import {NODE_API_ENDPOINT} from '../constants';
+import api from '../axiosConfig';
 
 interface DocumentUploadProps {
   tenantId: string;
@@ -193,28 +193,17 @@ const DocumentUpload: React.FC<DocumentUploadProps> = ({
       } as any);
       formData.append('name', documentName.trim());
 
-      const response = await fetch(
-        `${NODE_API_ENDPOINT}/tenant/addDocument/${tenantId}`,
+      const response = await api.post(
+        `/tenant/addDocument/${tenantId}`,
+        formData,
         {
-          method: 'POST',
           headers: {
             'Content-Type': 'multipart/form-data',
-            Authorization: `Bearer ${userToken}`,
           },
-          body: formData,
         },
       );
 
-      if (!response.ok) {
-        const errorData = await response.json().catch(() => ({}));
-        console.log(errorData);
-        throw new Error(
-          errorData.message ||
-            `HTTP ${response.status}: Failed to upload document`,
-        );
-      }
-
-      const result = await response.json();
+      const result = response.data;
       console.log('Upload success:', result);
 
       Alert.alert(
@@ -228,21 +217,26 @@ const DocumentUpload: React.FC<DocumentUploadProps> = ({
       setShowModal(false);
 
       onUploadSuccess();
-    } catch (error) {
+    } catch (error: any) {
       console.error('Upload error:', error);
 
       let errorMessage = 'Failed to upload document. Please try again.';
 
-      if (error instanceof Error) {
-        if (error.message.includes('400')) {
-          errorMessage = 'No file selected or invalid file format.';
-        } else if (error.message.includes('404')) {
+      if (error.response) {
+        const status = error.response.status;
+        if (status === 400) {
+          errorMessage =
+            error.response.data?.message ||
+            'No file selected or invalid file format.';
+        } else if (status === 404) {
           errorMessage = 'Tenant not found. Please try again.';
-        } else if (error.message.includes('500')) {
+        } else if (status === 500) {
           errorMessage = 'Server error. Please try again later.';
-        } else if (error.message.includes('Network')) {
-          errorMessage = 'Network error. Please check your connection.';
+        } else {
+          errorMessage = error.response.data?.message || errorMessage;
         }
+      } else if (error.request) {
+        errorMessage = 'Network error. Please check your connection.';
       }
 
       onUploadError(errorMessage);

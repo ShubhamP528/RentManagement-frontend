@@ -16,6 +16,7 @@ import TransactionList from '../screens/TransactionList';
 import TenantDocuments from '../screens/TenantDocuments';
 import {MenuProvider} from 'react-native-popup-menu';
 import PropertyDetailScreen from '../screens/PropertyDetailScreen ';
+import {navigationRef} from '../navigationRef';
 
 // Params for Home Stack
 export type RootStackParamList = {
@@ -62,7 +63,7 @@ function HomeStackNavigator() {
     );
   }
   return (
-    <NavigationContainer>
+    <NavigationContainer ref={navigationRef}>
       <MenuProvider>
         <Stack.Navigator
           initialRouteName={currentUser ? 'Properties' : 'Login'}

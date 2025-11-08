@@ -1,13 +1,13 @@
 import axios from 'axios';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import {NODE_API_ENDPOINT} from './constants';
-import {store} from './store'; // Import your Redux store
-import {logout} from './slices/authSlice'; // Import logout action
+import {store} from './redux/store'; // Import your Redux store
+import {logout} from './redux/authSlice'; // Import logout action
 import {navigationRef} from './navigationRef';
 
 const api = axios.create({
   baseURL: NODE_API_ENDPOINT,
-  timeout: 10000,
+  timeout: 180000,
   headers: {
     'Content-Type': 'application/json',
   },
@@ -48,11 +48,11 @@ api.interceptors.response.use(
         // Dispatch logout action to Redux
         store.dispatch(logout());
 
-        // Navigate to login screen
+        // Navigate to login screen using navigationRef
         if (navigationRef.isReady()) {
           navigationRef.reset({
             index: 0,
-            routes: [{name: 'Login'}],
+            routes: [{name: 'Login'}], // Direct screen name
           });
         }
       }

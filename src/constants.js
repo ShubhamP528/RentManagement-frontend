@@ -1,13 +1,11 @@
+import DeviceInfo from 'react-native-device-info';
+import {Alert, Linking, Platform} from 'react-native';
+import messaging from '@react-native-firebase/messaging';
+
 export const NODE_API_ENDPOINT =
   process.env.NODE_ENV === 'production'
     ? 'https://rent-management-backend-three.vercel.app'
-    : 'http://192.168.1.6:8800';
-
-import DeviceInfo from 'react-native-device-info';
-import {Alert, Linking, Platform} from 'react-native';
-import {getMessaging} from '@react-native-firebase/messaging';
-import DeviceInfo from 'react-native-device-info';
-import {Platform} from 'react-native';
+    : 'http://192.168.1.3:8800';
 
 const API_ENDPOINT =
   'https://rent-management-backend-three.vercel.app/app-version'; // Replace with your actual API
@@ -73,7 +71,7 @@ export const checkAppVersion = async () => {
 };
 
 export const getFCMToken = async () => {
-  const token = await getMessaging().getToken();
+  const token = await messaging().getToken();
   console.log('FCM Token:', token);
   // Send this token to your backend
   return token;

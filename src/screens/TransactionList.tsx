@@ -16,10 +16,10 @@ import {
 } from 'react-native';
 import {NativeStackScreenProps} from '@react-navigation/native-stack';
 import {RootStackParamList} from '../stacks/Home';
-import {NODE_API_ENDPOINT} from '../constants';
 import {useSelector} from 'react-redux';
 import {RootState} from '../redux/store';
 import Icon from 'react-native-vector-icons/MaterialCommunityIcons';
+import api from '../axiosConfig';
 import DatePicker from 'react-native-date-picker';
 import CustomHeader from '../component/CustomHeader';
 import {RentAppColors, getRentThemeColors} from '../constants/colors';
@@ -82,26 +82,8 @@ const TransactionList = ({route, navigation}: TransactionListProps) => {
     async (isRefresh = false) => {
       try {
         if (!isRefresh) setLoading(true);
-        const response = await fetch(
-          `${NODE_API_ENDPOINT}/tenant/getTransaction/${tenantId}`,
-          {
-            method: 'GET',
-            headers: {
-              'Content-Type': 'application/json',
-              Authorization: `Bearer ${currentUser?.token}`,
-            },
-          },
-        );
-        if (!response.ok) {
-          setLoading(false);
-          setRefreshing(false);
-          Alert.alert(
-            'Error',
-            'Failed to fetch transactions. Please try again.',
-          );
-          return;
-        }
-        const data = await response.json();
+        const response = await api.get(`/tenant/getTransaction/${tenantId}`);
+        const data = response.data;
         setTransactions(data.transaction);
         setLoading(false);
         setRefreshing(false);
@@ -119,14 +101,18 @@ const TransactionList = ({route, navigation}: TransactionListProps) => {
             useNativeDriver: true,
           }),
         ]).start();
-      } catch (error) {
+      } catch (error: any) {
         setLoading(false);
         setRefreshing(false);
-        Alert.alert('Error', 'An error occurred while fetching transactions.');
+        Alert.alert(
+          'Error',
+          error.response?.data?.message ||
+            'An error occurred while fetching transactions.',
+        );
         console.error('Error:', error);
       }
     },
-    [currentUser?.token, tenantId, fadeAnim, slideAnim],
+    [tenantId, fadeAnim, slideAnim],
   );
 
   const onRefresh = useCallback(() => {
@@ -186,28 +172,20 @@ const TransactionList = ({route, navigation}: TransactionListProps) => {
 
     try {
       setAddLoading(true);
-      const response = await fetch(`${NODE_API_ENDPOINT}/payment/addPayment`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          Authorization: `Bearer ${currentUser?.token}`,
-        },
-        body: JSON.stringify(payload),
-      });
-
-      if (!response.ok) {
-        throw new Error('Failed to add payment');
-      }
-
-      const transec = await response.json();
+      const response = await api.post('/payment/addPayment', payload);
+      const transec = response.data;
       Alert.alert('Success', 'Payment added successfully! 🎉');
 
       setTransactions([...transactions, transec.payment]);
       resetForm();
       setIsModalVisible(false);
-    } catch (error) {
+    } catch (error: any) {
       console.error('Error:', error);
-      Alert.alert('Error', 'Failed to add payment. Please try again.');
+      Alert.alert(
+        'Error',
+        error.response?.data?.message ||
+          'Failed to add payment. Please try again.',
+      );
     } finally {
       setAddLoading(false);
     }

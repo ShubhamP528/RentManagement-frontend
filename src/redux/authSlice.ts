@@ -1,6 +1,7 @@
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { createAsyncThunk, createSlice, PayloadAction } from '@reduxjs/toolkit';
-import { getFCMToken, NODE_API_ENDPOINT } from '../constants';
+import { getFCMToken } from '../constants';
+import api from '../axiosConfig';
 
 interface User {
   token: string;
@@ -31,35 +32,24 @@ export const retriveAuth = createAsyncThunk<
       console.log(parsedUser);
       console.log(typeof parsedUser);
       console.log('api calling');
-      const response = await fetch(`${NODE_API_ENDPOINT}/owner/auth/verify`, {
-        method: 'GET',
-        headers: {
-          'Content-Type': 'application/json',
-          Authorization: `Bearer ${parsedUser}`,
-        },
-      });
+      const response = await api.get('/owner/auth/verify');
       console.log('api calling');
-
-      if (!response.ok) {
-        console.log('api failed');
-        throw new Error('Failed to verify token');
-      }
 
       console.log('api successful');
 
-      const parsedProps = await response.json();
+      const parsedProps = response.data;
       console.log(response);
       const user: User = {
         token: parsedUser,
         username: parsedProps.username,
       };
-      const FMCtoken = await getFCMToken()
       return { user };
     } else {
       return null;
     }
   } catch (error: any) {
-    return rejectWithValue(error.message || 'Failed to retrieve user data');
+    console.log('api failed');
+    return rejectWithValue(error.response?.data?.message || error.message || 'Failed to retrieve user data');
   }
 });
 

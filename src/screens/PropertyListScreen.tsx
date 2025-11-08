@@ -18,7 +18,6 @@ import {
 } from 'react-native';
 import Icon from 'react-native-vector-icons/MaterialCommunityIcons';
 import {RootStackParamList} from '../stacks/Home';
-import {NODE_API_ENDPOINT} from '../constants';
 import {useDispatch, useSelector} from 'react-redux';
 import {RootState} from '../redux/store';
 import {
@@ -27,6 +26,7 @@ import {
   useNavigation,
 } from '@react-navigation/native';
 import {logout} from '../redux/authSlice';
+import api from '../axiosConfig';
 import CustomHeader from '../component/CustomHeader';
 import {RentAppColors, getRentThemeColors} from '../constants/colors';
 import {useTheme} from '../contexts/ThemeContext';
@@ -85,22 +85,8 @@ const PropertyListScreen = ({navigation}: PropertiesProps) => {
     async (isRefresh = false) => {
       try {
         if (!isRefresh) setLoading(true);
-        const response = await fetch(
-          `${NODE_API_ENDPOINT}/properties/get-properties`,
-          {
-            method: 'GET',
-            headers: {
-              'Content-Type': 'application/json',
-              Authorization: `Bearer ${currentUser?.token}`,
-            },
-          },
-        );
-        if (!response.ok) {
-          setLoading(false);
-          setRefreshing(false);
-          throw new Error(`HTTP error! status: ${response.status}`);
-        }
-        const data = await response.json();
+        const response = await api.get('/properties/get-properties');
+        const data = response.data;
 
         console.log(data.properties);
 
@@ -127,7 +113,7 @@ const PropertyListScreen = ({navigation}: PropertiesProps) => {
         setRefreshing(false);
       }
     },
-    [currentUser?.token, fadeAnim, slideAnim],
+    [fadeAnim, slideAnim],
   );
 
   const onRefresh = useCallback(() => {
@@ -194,26 +180,12 @@ const PropertyListScreen = ({navigation}: PropertiesProps) => {
 
     try {
       setAddLoading(true);
-      const response = await fetch(
-        `${NODE_API_ENDPOINT}/properties/add-property`,
-        {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-            Authorization: `Bearer ${currentUser?.token}`,
-          },
-          body: JSON.stringify({
-            propertyName: propertyName,
-            address,
-            rooms: [],
-          }),
-        },
-      );
-      if (!response.ok) {
-        setAddLoading(false);
-        throw new Error(`HTTP error! status: ${response.status}`);
-      }
-      const data = await response.json();
+      const response = await api.post('/properties/add-property', {
+        propertyName: propertyName,
+        address,
+        rooms: [],
+      });
+      const data = response.data;
       console.log(data);
       setAddLoading(false);
       Alert.alert('Success', 'Property added successfully! 🎉');
@@ -222,10 +194,18 @@ const PropertyListScreen = ({navigation}: PropertiesProps) => {
 
       // Update the properties list with the new property
       setProperties([...properties, data]);
-    } catch (error) {
+    } catch (error: any) {
       setAddLoading(false);
       console.error('Error:', error);
-      Alert.alert('Error', 'Failed to add property. Please try again.');
+      if (error.response) {
+        Alert.alert(
+          'Error',
+          error.response.data?.message ||
+            'Failed to add property. Please try again.',
+        );
+      } else {
+        Alert.alert('Error', 'Failed to add property. Please try again.');
+      }
     }
   };
 
@@ -272,27 +252,19 @@ const PropertyListScreen = ({navigation}: PropertiesProps) => {
         text: 'Logout',
         style: 'destructive',
         onPress: async () => {
-          const logoutAPI = await fetch(
-            `${NODE_API_ENDPOINT}/owner/auth/logout`,
-            {
-              method: 'PATCH',
-              headers: {
-                'Content-Type': 'application/json',
-                Authorization: `Bearer ${currentUser?.token}`,
-              },
-            },
-          );
-          if (!logoutAPI.ok) {
+          try {
+            await api.patch('/owner/auth/logout');
+            dispatch(logout());
+            rootNavigation.dispatch(
+              CommonActions.reset({
+                index: 0,
+                routes: [{name: 'Login'}], // reset stack to Login screen
+              }),
+            );
+          } catch (error: any) {
+            console.error('Logout error:', error);
             Alert.alert('Error', 'Failed to logout. Please try again.');
-            return;
           }
-          dispatch(logout());
-          rootNavigation.dispatch(
-            CommonActions.reset({
-              index: 0,
-              routes: [{name: 'Login'}], // reset stack to Login screen
-            }),
-          );
         },
       },
     ]);

@@ -19,9 +19,9 @@ import {
 } from 'react-native';
 import {NativeStackScreenProps} from '@react-navigation/native-stack';
 import {RootStackParamList} from '../stacks/Home';
-import {NODE_API_ENDPOINT} from '../constants';
 import {useSelector} from 'react-redux';
 import {RootState} from '../redux/store';
+import api from '../axiosConfig';
 import {
   Menu,
   MenuOptions,
@@ -107,30 +107,19 @@ const TenantCarousel = ({navigation, route}: PropertyDetailProps) => {
     console.log(obj);
     setAddLoading(true);
     try {
-      const addNewTenant = await fetch(
-        `${NODE_API_ENDPOINT}/tenant/addTenant/${roomId}`,
-        {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-            Authorization: `Bearer ${currentUser?.token}`,
-          },
-          body: JSON.stringify(obj),
-        },
-      );
-
-      if (!addNewTenant.ok) {
-        const resp = await addNewTenant.json();
-        console.log(resp);
-        throw new Error('Failed to add new tenant');
-      }
+      const response = await api.post(`/tenant/addTenant/${roomId}`, obj);
+      console.log(response.data);
 
       Alert.alert('Success', 'Tenant added successfully! 🎉');
       setShowModel(false);
       getRoomDetails();
-    } catch (error) {
+    } catch (error: any) {
       console.error('Failed to add new tenant:', error);
-      Alert.alert('Error', 'Failed to add new tenant. Please try again.');
+      Alert.alert(
+        'Error',
+        error.response?.data?.message ||
+          'Failed to add new tenant. Please try again.',
+      );
     } finally {
       setAddLoading(false);
     }
@@ -140,26 +129,8 @@ const TenantCarousel = ({navigation, route}: PropertyDetailProps) => {
     async (isRefresh = false) => {
       try {
         if (!isRefresh) setLoading(true);
-        const response = await fetch(
-          `${NODE_API_ENDPOINT}/room/details/${roomId}`,
-          {
-            method: 'GET',
-            headers: {
-              'Content-Type': 'application/json',
-              Authorization: `Bearer ${currentUser?.token}`,
-            },
-          },
-        );
-        if (!response.ok) {
-          setLoading(false);
-          setRefreshing(false);
-          Alert.alert(
-            'Error',
-            'Failed to fetch room details. Please try again.',
-          );
-          return;
-        }
-        const data = await response.json();
+        const response = await api.get(`/room/details/${roomId}`);
+        const data = response.data;
         setLoading(false);
         setRefreshing(false);
         setTenants(data.tenant.reverse());
@@ -177,14 +148,18 @@ const TenantCarousel = ({navigation, route}: PropertyDetailProps) => {
             useNativeDriver: true,
           }),
         ]).start();
-      } catch (error) {
+      } catch (error: any) {
         setLoading(false);
         setRefreshing(false);
         console.error('Error:', error);
-        Alert.alert('Error', 'Something went wrong. Please try again.');
+        Alert.alert(
+          'Error',
+          error.response?.data?.message ||
+            'Something went wrong. Please try again.',
+        );
       }
     },
-    [roomId, currentUser, fadeAnim, slideAnim],
+    [roomId, fadeAnim, slideAnim],
   );
 
   const onRefresh = useCallback(() => {
@@ -210,29 +185,21 @@ const TenantCarousel = ({navigation, route}: PropertyDetailProps) => {
   const markAsLeft = async (tenantId: string) => {
     try {
       setMarkingAsLeft(true); // start spinner
-      const response = await fetch(
-        `${NODE_API_ENDPOINT}/tenant/removeTenant/${roomId}`,
-        {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-            Authorization: `Bearer ${currentUser?.token}`,
-          },
-          body: JSON.stringify({endDate: new Date().toISOString(), tenantId}),
-        },
-      );
-      if (!response.ok) {
-        setMarkingAsLeft(false);
-        console.error('Error marking tenant as left', response);
-        return;
-      }
+      await api.post(`/tenant/removeTenant/${roomId}`, {
+        endDate: new Date().toISOString(),
+        tenantId,
+      });
       // Refresh tenant list
       const updatedTenants = tenants.map(t =>
         t._id === tenantId ? {...t, endDate: new Date().toISOString()} : t,
       );
       setTenants(updatedTenants);
-    } catch (error) {
+    } catch (error: any) {
       console.error('Error:', error);
+      Alert.alert(
+        'Error',
+        error.response?.data?.message || 'Failed to mark tenant as left.',
+      );
     } finally {
       setMarkingAsLeft(false); // stop spinner
     }
@@ -294,34 +261,24 @@ const TenantCarousel = ({navigation, route}: PropertyDetailProps) => {
     try {
       setEditLoading(true);
 
-      const response = await fetch(
-        `${NODE_API_ENDPOINT}/tenant/editTenant/${roomId}/${editingTenant._id}`,
-        {
-          method: 'PUT',
-          headers: {
-            'Content-Type': 'application/json',
-            Authorization: `Bearer ${currentUser?.token}`,
-          },
-          body: JSON.stringify(data),
-        },
+      const response = await api.put(
+        `/tenant/editTenant/${roomId}/${editingTenant._id}`,
+        data,
       );
 
-      if (!response.ok) {
-        throw new Error('Failed to update tenant details');
-      }
-
-      const result = await response.json();
+      const result = response.data;
       // refresh this screen
       getRoomDetails();
 
       Alert.alert('Success', 'Tenant details updated successfully! 🎉');
       setShowEditModal(false);
       setEditingTenant(null);
-    } catch (error) {
+    } catch (error: any) {
       console.error('Error updating tenant:', error);
       Alert.alert(
         'Error',
-        'Failed to update tenant details. Please try again.',
+        error.response?.data?.message ||
+          'Failed to update tenant details. Please try again.',
       );
     } finally {
       setEditLoading(false);
