@@ -1,11 +1,11 @@
 import DeviceInfo from 'react-native-device-info';
-import {Alert, Linking, Platform} from 'react-native';
+import { Alert, Linking, Platform } from 'react-native';
 import messaging from '@react-native-firebase/messaging';
 
 export const NODE_API_ENDPOINT =
   process.env.NODE_ENV === 'production'
     ? 'https://rent-management-backend-three.vercel.app'
-    : 'http://192.168.1.3:8800';
+    : 'http://192.168.1.2:8800';
 
 const API_ENDPOINT =
   'https://rent-management-backend-three.vercel.app/app-version'; // Replace with your actual API
@@ -20,7 +20,7 @@ export const checkAppVersion = async () => {
       return;
     }
 
-    const {latestVersion, mandatory, apkUrl} = await response.json();
+    const { latestVersion, mandatory, apkUrl } = await response.json();
     // const {latestVersion, mandatory, apkUrl} = {
     //   latestVersion: '1.0.1', // Example version
     //   mandatory: false, // Example mandatory flag
@@ -56,13 +56,13 @@ export const checkAppVersion = async () => {
           ...(mandatory
             ? []
             : [
-                {
-                  text: 'Later',
-                  style: 'cancel',
-                },
-              ]),
+              {
+                text: 'Later',
+                style: 'cancel',
+              },
+            ]),
         ],
-        {cancelable: !mandatory},
+        { cancelable: !mandatory },
       );
     }
   } catch (error) {
@@ -81,9 +81,8 @@ export const getDeviceInfoString = async () => {
   const deviceName = await DeviceInfo.getDeviceName();
   const uniqueId = await DeviceInfo.getUniqueId();
 
-  const deviceInfoString = `Platform: ${
-    Platform.OS
-  }, Model: ${DeviceInfo.getModel()}, Brand: ${DeviceInfo.getBrand()}, System: ${DeviceInfo.getSystemVersion()}, Device ID: ${DeviceInfo.getDeviceId()}, Name: ${deviceName}, Unique ID: ${uniqueId}, App Version: ${DeviceInfo.getVersion()}`;
+  const deviceInfoString = `Platform: ${Platform.OS
+    }, Model: ${DeviceInfo.getModel()}, Brand: ${DeviceInfo.getBrand()}, System: ${DeviceInfo.getSystemVersion()}, Device ID: ${DeviceInfo.getDeviceId()}, Name: ${deviceName}, Unique ID: ${uniqueId}, App Version: ${DeviceInfo.getVersion()}`;
 
   console.log(deviceInfoString);
   return deviceInfoString;

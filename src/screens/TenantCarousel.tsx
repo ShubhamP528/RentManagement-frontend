@@ -31,6 +31,7 @@ import {
 } from 'react-native-popup-menu';
 import Icon from 'react-native-vector-icons/MaterialCommunityIcons';
 import AddNewTenant from '../component/AddNewTenant';
+import MarkTenantLeftModal from '../component/MarkTenantLeftModal';
 import {useFocusEffect} from '@react-navigation/native';
 import CustomHeader from '../component/CustomHeader';
 import {RentAppColors, getRentThemeColors} from '../constants/colors';
@@ -67,6 +68,7 @@ export interface Tenant {
   finalReading: number;
   PendingMoney: number;
   AdvanceMoney: number;
+  billingCycleDay?: number | null;
 }
 
 type PropertyDetailProps = NativeStackScreenProps<
@@ -84,6 +86,8 @@ const TenantCarousel = ({navigation, route}: PropertyDetailProps) => {
   const [markingAsLeft, setMarkingAsLeft] = useState(false);
   const [refreshing, setRefreshing] = useState(false);
   const [showEditModal, setShowEditModal] = useState<boolean>(false);
+  const [showMarkLeftModal, setShowMarkLeftModal] = useState<boolean>(false);
+  const [tenantForMarkLeft, setTenantForMarkLeft] = useState<Tenant | null>(null);
   const [editingTenant, setEditingTenant] = useState<Tenant | null>(null);
   const [editLoading, setEditLoading] = useState<boolean>(false);
 
@@ -466,18 +470,8 @@ const TenantCarousel = ({navigation, route}: PropertyDetailProps) => {
                     </MenuOption>
                     <MenuOption
                       onSelect={() => {
-                        Alert.alert(
-                          'Mark Tenant as Left',
-                          `Are you sure you want to mark ${item.headPerson?.name} as left?`,
-                          [
-                            {text: 'Cancel', style: 'cancel'},
-                            {
-                              text: 'Yes, Mark as Left',
-                              style: 'destructive',
-                              onPress: () => markAsLeft(item._id),
-                            },
-                          ],
-                        );
+                        setTenantForMarkLeft(item);
+                        setShowMarkLeftModal(true);
                       }}>
                       <View className="flex-row items-center py-2">
                         <Icon
@@ -503,6 +497,7 @@ const TenantCarousel = ({navigation, route}: PropertyDetailProps) => {
                       tenantId: item._id,
                       roomId,
                       previousReading: item.finalReading,
+                      tenant: item,
                     })
                   }>
                   <View className="flex-row items-center py-2">
@@ -625,6 +620,39 @@ const TenantCarousel = ({navigation, route}: PropertyDetailProps) => {
                   weight="bold"
                   style={{color: RentAppColors.primary[600]}}>
                   ₹{item.Rent?.toLocaleString() || 0}
+                </ThemedText>
+              </View>
+
+              <View
+                style={{
+                  flexDirection: 'row',
+                  alignItems: 'center',
+                  justifyContent: 'space-between',
+                  backgroundColor: themeColors.surfaceVariant,
+                  padding: 16,
+                  borderRadius: 12,
+                  marginBottom: 8,
+                }}>
+                <View className="flex-row items-center">
+                  <Icon
+                    name="calendar-clock"
+                    size={20}
+                    color={themeColors.text.tertiary}
+                  />
+                  <ThemedText
+                    variant="tertiary"
+                    weight="medium"
+                    style={{marginLeft: 8}}>
+                    Rent Due Day
+                  </ThemedText>
+                </View>
+                <ThemedText
+                  size="base"
+                  weight="bold"
+                  style={{color: themeColors.text.primary}}>
+                  {item.billingCycleDay
+                    ? `${item.billingCycleDay}th of month`
+                    : `${new Date(item.startDate).getDate()}th of month`}
                 </ThemedText>
               </View>
 
@@ -1054,9 +1082,26 @@ const TenantCarousel = ({navigation, route}: PropertyDetailProps) => {
                 endDate: editingTenant.endDate,
                 Rent: editingTenant.Rent?.toString() || '',
                 initialReading: editingTenant.initialReading?.toString() || '',
+                billingCycleDay: editingTenant.billingCycleDay?.toString() || '',
               }
             : undefined
         }
+      />
+
+      <MarkTenantLeftModal
+        visible={showMarkLeftModal}
+        onClose={() => {
+          setShowMarkLeftModal(false);
+          setTenantForMarkLeft(null);
+        }}
+        tenant={tenantForMarkLeft}
+        roomId={roomId}
+        onSuccess={(updatedTenant) => {
+          const updatedTenants = tenants.map(t =>
+            t._id === updatedTenant._id ? updatedTenant : t,
+          );
+          setTenants(updatedTenants);
+        }}
       />
     </View>
   );

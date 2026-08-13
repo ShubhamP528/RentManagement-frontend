@@ -28,6 +28,7 @@ export type RootStackParamList = {
     tenantId: string;
     roomId: string;
     previousReading: number;
+    tenant?: any;
   };
   TenantDocuments: {
     tenantId: string;

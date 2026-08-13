@@ -1,3 +1,4 @@
+/* eslint-disable react-hooks/exhaustive-deps */
 import React, {useEffect} from 'react';
 import './global.css';
 import HomeStackNavigator from './src/stacks/Home';
@@ -9,8 +10,21 @@ import {PermissionsAndroid, Platform} from 'react-native';
 import {navigationRef} from './src/navigationRef';
 import notifee, {EventType} from '@notifee/react-native';
 import {createNotificationChannel} from './src/utils/notificationSetup';
-import {NavigationContainer} from '@react-navigation/native';
+import {checkAppVersion} from './src/constants';
+import codePush from '@revopush/react-native-code-push';
 
+// Optional: define sync options
+const codePushOptions = {
+  checkFrequency: codePush.CheckFrequency.ON_APP_START,
+  installMode: codePush.InstallMode.IMMEDIATE,
+  updateDialog: {
+    title: 'Update available',
+    optionalUpdateMessage:
+      'A new version is ready. Would you like to install it now?',
+    optionalInstallButtonLabel: 'Yes',
+    optionalIgnoreButtonLabel: 'Later',
+  },
+};
 // Display notification helper - extracts data from data-only payload
 async function displayNotification(remoteMessage: any) {
   // For data-only messages, everything is in 'data' field
@@ -62,9 +76,11 @@ function handleNotificationPress(notification: any) {
 
 const App: React.FC = () => {
   useEffect(() => {
+    checkAppVersion();
+    codePush.sync(codePushOptions);
     initializeNotifications();
     setupNotificationHandlers();
-  }, []);
+  }, [initializeNotifications]);
 
   async function initializeNotifications() {
     await createNotificationChannel();

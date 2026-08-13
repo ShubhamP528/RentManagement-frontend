@@ -46,18 +46,26 @@ type TransactionListProps = NativeStackScreenProps<
 >;
 
 const TransactionList = ({route, navigation}: TransactionListProps) => {
+  const {tenantId, roomId, previousReading, tenant} = route.params;
+  const isPastTenant = tenant && tenant.endDate !== null;
+
   const [transactions, setTransactions] = useState<Transaction[]>([]);
   const [isModalVisible, setIsModalVisible] = useState(false);
   const [DOP, setDOP] = useState(new Date());
-  const [MOP, setMOP] = useState('');
-  const [RoomRent, setRoomRent] = useState('');
-  const [currentReading, setCurrentReading] = useState('');
+  const [MOP, setMOP] = useState(isPastTenant ? 'Settlement' : '');
+  const [RoomRent, setRoomRent] = useState(
+    isPastTenant && tenant.PendingMoney ? tenant.PendingMoney.toString() : '',
+  );
+  const [currentReading, setCurrentReading] = useState(
+    isPastTenant ? previousReading.toString() : '',
+  );
   const [showDatePicker, setShowDatePicker] = useState(false);
   const [loading, setLoading] = useState<boolean>(false);
   const [addLoading, setAddLoading] = useState<boolean>(false);
   const [refreshing, setRefreshing] = useState(false);
   const [focusedField, setFocusedField] = useState<string | null>(null);
   const [formErrors, setFormErrors] = useState<{[key: string]: string}>({});
+  const [sendingEmailId, setSendingEmailId] = useState<string | null>(null);
 
   const status = 'Paid';
   const {isDark} = useTheme();
@@ -69,7 +77,6 @@ const TransactionList = ({route, navigation}: TransactionListProps) => {
   const slideAnim = useRef(new Animated.Value(30)).current;
 
   const currentUser = useSelector((state: RootState) => state.auth.user);
-  const {tenantId, roomId, previousReading} = route.params;
 
   // Hide default header - must be called before any early returns
   React.useLayoutEffect(() => {
@@ -191,11 +198,33 @@ const TransactionList = ({route, navigation}: TransactionListProps) => {
     }
   };
 
+  const handleSendEmailReceipt = async (paymentId: string) => {
+    try {
+      setSendingEmailId(paymentId);
+      await api.post(`/payment/sendReceiptEmail/${paymentId}`);
+      Alert.alert('Email Sent 📧', 'Payment receipt email has been sent successfully!');
+    } catch (error: any) {
+      console.error('Error sending receipt email:', error);
+      Alert.alert(
+        'Email Error',
+        error.response?.data?.message || 'Failed to send receipt email. Please ensure tenant email is configured.',
+      );
+    } finally {
+      setSendingEmailId(null);
+    }
+  };
+
   const resetForm = () => {
     setDOP(new Date());
-    setMOP('');
-    setRoomRent('');
-    setCurrentReading('');
+    if (isPastTenant) {
+      setMOP('Settlement');
+      setRoomRent(tenant && tenant.PendingMoney ? tenant.PendingMoney.toString() : '0');
+      setCurrentReading(previousReading ? previousReading.toString() : '0');
+    } else {
+      setMOP('');
+      setRoomRent('');
+      setCurrentReading('');
+    }
     setFormErrors({});
     setFocusedField(null);
   };
@@ -475,6 +504,44 @@ const TransactionList = ({route, navigation}: TransactionListProps) => {
                   ₹{item.totalAmount?.toLocaleString()}
                 </ThemedText>
               </View>
+
+              {/* Resend Receipt Email Button */}
+              <TouchableOpacity
+                onPress={() => handleSendEmailReceipt(item._id)}
+                disabled={sendingEmailId === item._id}
+                style={{
+                  flexDirection: 'row',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  backgroundColor: isDark
+                    ? RentAppColors.primary[900] + '60'
+                    : RentAppColors.primary[50],
+                  paddingVertical: 12,
+                  paddingHorizontal: 16,
+                  borderRadius: 12,
+                  marginTop: 12,
+                  borderWidth: 1,
+                  borderColor: RentAppColors.primary[200],
+                  opacity: sendingEmailId === item._id ? 0.7 : 1,
+                }}>
+                {sendingEmailId === item._id ? (
+                  <ActivityIndicator size="small" color={RentAppColors.primary[600]} />
+                ) : (
+                  <>
+                    <Icon
+                      name="email-fast-outline"
+                      size={18}
+                      color={RentAppColors.primary[600]}
+                    />
+                    <ThemedText
+                      size="sm"
+                      weight="semibold"
+                      style={{marginLeft: 8, color: RentAppColors.primary[600]}}>
+                      Send Email Receipt
+                    </ThemedText>
+                  </>
+                )}
+              </TouchableOpacity>
             </View>
           </View>
         </View>

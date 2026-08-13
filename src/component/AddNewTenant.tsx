@@ -41,8 +41,7 @@ interface TenantData {
   endDate: string | null;
   Rent: string;
   initialReading: string;
-  // PendingMoney: string;
-  // AdvanceMoney: string;
+  billingCycleDay?: string;
 }
 
 interface TenantFormModalProps {
@@ -70,6 +69,7 @@ const AddNewTenant: React.FC<TenantFormModalProps> = ({
     endDate: null,
     Rent: '',
     initialReading: '',
+    billingCycleDay: '',
   });
   const [errors, setErrors] = useState<{
     personsData: boolean[];
@@ -135,6 +135,7 @@ const AddNewTenant: React.FC<TenantFormModalProps> = ({
         endDate: null,
         Rent: '',
         initialReading: '',
+        billingCycleDay: '',
       });
     }
   }, [editMode, visible]); // Removed initialPersonsData and initialTenantData from dependencies
@@ -291,10 +292,12 @@ const AddNewTenant: React.FC<TenantFormModalProps> = ({
   const hideDatePickerDOB = () => setDatePickerVisibilityDOB(false);
 
   const handleStartDateConfirm = (selectedDate: Date) => {
-    setTenantData({
-      ...tenantData,
-      startDate: new Date(selectedDate).toISOString(),
-    });
+    const dateObj = new Date(selectedDate);
+    setTenantData(prev => ({
+      ...prev,
+      startDate: dateObj.toISOString(),
+      billingCycleDay: prev.billingCycleDay ? prev.billingCycleDay : dateObj.getDate().toString(),
+    }));
     hideDatePicker();
   };
 
@@ -557,6 +560,60 @@ const AddNewTenant: React.FC<TenantFormModalProps> = ({
                           Start date is required
                         </Text>
                       )}
+                    </View>
+
+                    {/* Rent Due Day of Month */}
+                    <View className="mb-6">
+                      <ThemedText
+                        size="sm"
+                        weight="medium"
+                        style={{marginBottom: 4}}>
+                        Rent Payment Due Day (1 - 31)
+                      </ThemedText>
+                      <ThemedText
+                        variant="secondary"
+                        size="xs"
+                        style={{marginBottom: 8}}>
+                        Day of the month rent is due (defaults to move-in day)
+                      </ThemedText>
+                      <View
+                        style={{
+                          flexDirection: 'row',
+                          alignItems: 'center',
+                          backgroundColor: themeColors.surfaceVariant,
+                          borderRadius: 12,
+                          paddingHorizontal: 16,
+                          paddingVertical: 4,
+                          borderWidth: 2,
+                          borderColor:
+                            focusedField === 'billingCycleDay'
+                              ? RentAppColors.primary[500]
+                              : themeColors.border,
+                        }}>
+                        <Icon
+                          name="calendar-clock"
+                          size={20}
+                          color={themeColors.text.tertiary}
+                        />
+                        <TextInput
+                          style={{
+                            flex: 1,
+                            paddingVertical: 14,
+                            paddingHorizontal: 12,
+                            fontSize: 16,
+                            color: themeColors.text.primary,
+                          }}
+                          placeholder="e.g., 10 (10th of every month)"
+                          placeholderTextColor={themeColors.text.tertiary}
+                          keyboardType="numeric"
+                          value={tenantData.billingCycleDay || ''}
+                          onChangeText={text => {
+                            setTenantData({...tenantData, billingCycleDay: text});
+                          }}
+                          onFocus={() => setFocusedField('billingCycleDay')}
+                          onBlur={() => setFocusedField(null)}
+                        />
+                      </View>
                     </View>
 
                     {/* Monthly Rent */}

@@ -49,6 +49,7 @@ const TenantDocuments = ({route, navigation}: TenantDocumentsProps) => {
     null,
   );
   const [showDocumentModal, setShowDocumentModal] = useState(false);
+  const [deletingId, setDeletingId] = useState<string | null>(null);
 
   const {isDark} = useTheme();
   const themeColors = getRentThemeColors(isDark);
@@ -163,6 +164,7 @@ const TenantDocuments = ({route, navigation}: TenantDocumentsProps) => {
 
   const deleteDocument = async (documentId: string) => {
     try {
+      setDeletingId(documentId);
       await api.delete(`/tenant/deleteDocument/${tenantId}/${documentId}`);
 
       Alert.alert('Success', 'Document deleted successfully');
@@ -174,6 +176,8 @@ const TenantDocuments = ({route, navigation}: TenantDocumentsProps) => {
           'Failed to delete document. Please try again.',
       );
       console.error('Error:', error);
+    } finally {
+      setDeletingId(null);
     }
   };
 
@@ -269,6 +273,7 @@ const TenantDocuments = ({route, navigation}: TenantDocumentsProps) => {
           </TouchableOpacity>
           <TouchableOpacity
             onPress={() => handleDeleteDocument(item._id)}
+            disabled={deletingId === item._id}
             style={{
               width: 40,
               height: 40,
@@ -277,7 +282,11 @@ const TenantDocuments = ({route, navigation}: TenantDocumentsProps) => {
               alignItems: 'center',
               justifyContent: 'center',
             }}>
-            <Icon name="delete" size={18} color={RentAppColors.status.error} />
+            {deletingId === item._id ? (
+              <ActivityIndicator size="small" color={RentAppColors.status.error} />
+            ) : (
+              <Icon name="delete" size={18} color={RentAppColors.status.error} />
+            )}
           </TouchableOpacity>
         </View>
       </View>
